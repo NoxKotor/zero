@@ -32,6 +32,17 @@
   </style>
 </head>
 <body>
+  <script>
+  if (window.TelegramGameProxy) {
+    TelegramGameProxy.ready();  // Сообщаем Telegram, что игра загрузилась
+  }
+
+  // Принудительно растягиваем окно
+  if (window.Telegram && window.Telegram.WebApp) {
+    Telegram.WebApp.expand(); // Попытка развернуть на полный экран
+  }
+</script>
+
 <div id="score"></div>
 <canvas id="gameCanvas" width="400" height="600"></canvas>
 
