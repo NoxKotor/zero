@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Snake Game</title>
+  <style>
+    body {
+      margin: 0; 
+      padding: 0; 
+      background: #333; 
+      display: flex; 
+      justify-content: center; 
+      align-items: center; 
+      height: 100vh; 
+      color: #fff;
+      font-family: sans-serif;
+    }
+    #gameCanvas {
+      background: #000;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+<canvas id="gameCanvas" width="400" height="400"></canvas>
+
+<script>
+/*
+  Простейшая реализация «Змейки».
+  Управление: стрелками на клавиатуре.
+*/
+
+// Получаем canvas и контекст
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// Размер ячейки
+const gridSize = 20;
+const tileCount = canvas.width / gridSize;
+
+// Координаты головы змейки
+let snakeX = 10;
+let snakeY = 10;
+
+// Скорость змейки (по оси X и Y)
+let velocityX = 0;
+let velocityY = 0;
+
+// Тело змейки (массив с координатами всех сегментов)
+const snakeBody = [];
+let snakeLength = 3; // начальная длина змейки
+
+// Координаты яблока
+let appleX = 5;
+let appleY = 5;
+
+// Звук поедания (опционально)
+// const eatSound = new Audio('eat.mp3');
+
+// Основной игровой цикл
+function gameLoop() {
+  // Двигаем змейку
+  snakeX += velocityX;
+  snakeY += velocityY;
+
+  // Если вышли за границы — появляемся с другой стороны (партал)
+  if (snakeX < 0) {
+    snakeX = tileCount - 1;
+  }
+  if (snakeX >= tileCount) {
+    snakeX = 0;
+  }
+  if (snakeY < 0) {
+    snakeY = tileCount - 1;
+  }
+  if (snakeY >= tileCount) {
+    snakeY = 0;
+  }
+
+  // Рисуем фон
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Рисуем яблоко
+  ctx.fillStyle = 'red';
+  ctx.fillRect(appleX * gridSize, appleY * gridSize, gridSize - 2, gridSize - 2);
+
+  // Добавляем текущую позицию в начало snakeBody
+  snakeBody.unshift({ x: snakeX, y: snakeY });
+
+  // Удаляем хвост, если длина больше, чем snakeLength
+  while (snakeBody.length > snakeLength) {
+    snakeBody.pop();
+  }
+
+  // Рисуем змейку
+  ctx.fillStyle = 'lime';
+  snakeBody.forEach(segment => {
+    ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize - 2, gridSize - 2);
+  });
+
+  // Если змейка съела яблоко
+  if (snakeX === appleX && snakeY === appleY) {
+    snakeLength++;
+    // eatSound.play();
+    // Ставим новое яблоко в рандомное место
+    appleX = Math.floor(Math.random() * tileCount);
+    appleY = Math.floor(Math.random() * tileCount);
+  }
+
+  // Проверяем столкновение головы змейки с её телом (кроме самой головы)
+  for (let i = 1; i < snakeBody.length; i++) {
+    if (snakeBody[i].x === snakeX && snakeBody[i].y === snakeY) {
+      // Сброс игры
+      snakeLength = 3;
+      velocityX = 0;
+      velocityY = 0;
+      // Обрезаем до длины 3
+      snakeBody.splice(3);
+      break;
+    }
+  }
+}
+
+// Управление с клавиатуры
+document.addEventListener('keydown', (event) => {
+  switch (event.key) {
+    case 'ArrowLeft':
+      // Движение влево
+      if (velocityX === 1) break; // нельзя резко идти в противоположную сторону
+      velocityX = -1;
+      velocityY = 0;
+      break;
+    case 'ArrowRight':
+      // Движение вправо
+      if (velocityX === -1) break;
+      velocityX = 1;
+      velocityY = 0;
+      break;
+    case 'ArrowUp':
+      // Движение вверх
+      if (velocityY === 1) break;
+      velocityX = 0;
+      velocityY = -1;
+      break;
+    case 'ArrowDown':
+      // Движение вниз
+      if (velocityY === -1) break;
+      velocityX = 0;
+      velocityY = 1;
+      break;
+  }
+});
+
+// Запускаем игровой цикл (60 раз в секунду)
+setInterval(gameLoop, 1000 / 10); // 10 fps - можно ускорить до 15-20 при желании
+</script>
+</body>
+</html>
